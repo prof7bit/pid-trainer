@@ -4,19 +4,25 @@ import tkinter as tk
 import math
 
 DELAY = 10
+WIDTH = 640
+HEIGHT = 480
 
 class DelayLine:
     def __init__(self, delay):
-        self.delay = delay
+        self.delay_steps = delay
         self.buffer = [0] * delay
         self.index = 0
 
     def delay(self, value):
         self.buffer[self.index] = value
         self.index += 1
-        if self.index >= self.delay:
+        if self.index >= self.delay_steps:
             self.index = 0
         return self.buffer[self.index]
+
+    def init(self, value):
+        for i in range(self.delay_steps):
+            self.buffer[i] = value
 
 
 class PID:
@@ -32,46 +38,58 @@ class PID:
         self.ki = ki
         self.kd = kd
 
+    def reset(self):
+        self.previous = 0
+        self.intergral = 0
+
     def calculate(self, error):
-        pass
+        p = error * self.kp
+        i = self.intergral + error * self.ki
+        self.intergral = i
+        d = (error - self.previous) * self.kd
+        self.previous = error
+        return p + i + d
 
 
 class App:
     def __init__(self):
-        self.cw = 640
-        self.ch = 480
-
         self.delay_line = DelayLine(DELAY)
+        self.pid = PID()
 
         self.root = tk.Tk()
         self.slider_p = tk.Scale(self.root, from_=100, to=0, command=self.update)
         self.slider_i = tk.Scale(self.root, from_=100, to=0, command=self.update)
         self.slider_d = tk.Scale(self.root, from_=100, to=0, command=self.update)
-        self.plot = tk.Canvas(self.root, width=self.cw, height=self.ch)
+        self.plot = tk.Canvas(self.root, width=WIDTH, height=HEIGHT, background="#000000")
 
         self.plot.grid(row=0, column=0)
         self.slider_p.grid(row=0, column=1)
         self.slider_i.grid(row=0, column=2)
         self.slider_d.grid(row=0, column=3)
 
-        y = int(self.ch / 2)
-        self.plot.create_line(0, y, self.cw, y, fill="#476042")
-
+        self.update(None)
         self.root.mainloop()
 
-    def update(self, event):
-        kp = self.slider_p.get()
-        ki = self.slider_i.get()
-        kd = self.slider_d.get()
 
+    def update(self, event):
+        self.pid.set_params(
+            self.slider_p.get() * 0.001,
+            self.slider_i.get() * 0.00001,
+            self.slider_d.get() * 0.01
+        )
         self.plot.delete(tk.ALL)
         prevx = 0
-        prevy = 0
-        zero = self.ch / 2
-        amp = self.ch / 2
-        for x in range(0, self.cw):
-            y = zero + kp * math.sin(x / (1 + ki))
-            self.plot.create_line(prevx, prevy, x, y)
+        prevy = HEIGHT
+        variable = 0
+        self.delay_line.init(0)
+        self.pid.reset()
+        setpoint = HEIGHT / 2
+        amp = HEIGHT / 2
+        for x in range(0, WIDTH):
+            error = self.delay_line.delay(setpoint - variable)
+            variable += self.pid.calculate(error)
+            y = HEIGHT - variable
+            self.plot.create_line(prevx, prevy, x, y, fill="#3333ff")
             prevx = x
             prevy = y
 
