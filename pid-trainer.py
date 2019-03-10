@@ -120,8 +120,6 @@ class App:
             prevx = x
             prevy = y
 
-        pass
-
 
 if __name__ == '__main__':
     app = App()
