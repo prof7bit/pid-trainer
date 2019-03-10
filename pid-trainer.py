@@ -69,9 +69,9 @@ class App:
         self.plot = tk.Canvas(self.root, width=WIDTH, height=HEIGHT, background="#000000")
 
         # initialize sliders with some reasonable values
-        self.slider_p.set(31)
-        self.slider_i.set(14)
-        self.slider_d.set(36)
+        self.slider_p.set(29)
+        self.slider_i.set(27)
+        self.slider_d.set(24)
 
         self.plot.grid(row=0, column=0)
         self.slider_p.grid(row=0, column=1)
