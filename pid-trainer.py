@@ -107,7 +107,7 @@ class App:
 
         # now run the simulation, iterate over time
         for x in range(0, WIDTH):
-            # run the control loop and delay and the correction
+            # run the control loop and delay the correction
             # of the PID controller with a heavy low pass filter
             # to simulate some inertia, delay and filtering
             variable = variable * DRAG
