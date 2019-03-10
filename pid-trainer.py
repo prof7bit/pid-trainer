@@ -4,6 +4,7 @@ import tkinter as tk
 import math
 
 FILTER = 50
+DRAG = 0.99          # [1...0]; 1 == no drag at all
 WIDTH = 1200
 HEIGHT = 400
 
@@ -109,6 +110,7 @@ class App:
             # run the control loop and delay and the correction
             # of the PID controller with a heavy low pass filter
             # to simulate some inertia, delay and filtering
+            variable = variable * DRAG
             error = setpoint - variable
             correction = self.pid.calculate(error)
             delayed_effect = self.filter.update(correction)
